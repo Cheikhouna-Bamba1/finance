@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tableau de bord — Dahira Maftikhoul Jinan</title>
+  <meta name="description" content="Tableau de bord financier de la Dahira Maftikhoul Jinan. Résumé des cotisations, dépenses et solde en temps réel." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     NAVBAR
+════════════════════════════════ -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <img src="WhatsApp Image 2026-06-24 at 11.21.32.jpeg" alt="Logo Dahira Maftikhoul Jinan" class="brand-logo" />
+    <div>
+      <span>Dahira Maftikhoul Jinan<small>Gestion Financière</small></span>
+    </div>
+  </div>
+
+  <div class="navbar-menu" id="navbar-menu">
+    <a href="dashboard.html"   class="nav-link active" id="nl-dashboard">
+      <i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord
+    </a>
+    <a href="cotisations.html" class="nav-link" id="nl-cotisations">
+      <i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations
+    </a>
+    <a href="depenses.html"    class="nav-link" id="nl-depenses">
+      <i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses
+    </a>
+    <a href="evenements.html"  class="nav-link" id="nl-evenements">
+      <i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements
+    </a>
+    <a href="projets.html"     class="nav-link" id="nl-projets">
+      <i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets
+    </a>
+    <a href="bilan.html"       class="nav-link" id="nl-bilan">
+      <i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan
+    </a>
+  </div>
+
+  <div class="navbar-actions">
+    <div class="navbar-user">
+      <i class="fa-solid fa-user"></i>
+      <span id="nav-user-email" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem;"></span>
+    </div>
+    <button class="btn-logout" id="logout-btn">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      Déconnexion
+    </button>
+  </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="dashboard.html"   class="nav-link active"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
+  <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
+  <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
+  <a href="evenements.html"  class="nav-link"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
+  <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
+  <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
+  <button class="btn-logout" style="margin-top:auto" id="logout-btn-mobile">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    Déconnexion
+  </button>
+</div>
+
+<!-- ═══════════════════════════════
+     CONTENU PRINCIPAL
+════════════════════════════════ -->
+<div class="page-wrapper">
+  <div class="container">
+
+    <!-- En-tête -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <i class="fa-solid fa-chart-pie"></i>
+          Tableau de bord
+        </h1>
+        <p class="page-subtitle">Vue d'ensemble en temps réel des finances de l'association</p>
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <span id="live-date" style="font-size:.82rem;color:var(--gray-400)"></span>
+      </div>
+    </div>
+
+    <!-- ─── Cartes statistiques ─── -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <i class="fa-solid fa-sack-dollar"></i>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Total Cotisations</div>
+          <div class="stat-value" id="stat-cotisations">—</div>
+          <div class="stat-sub" id="stat-cotisations-nb">— membres</div>
+        </div>
+      </div>
+
+      <div class="stat-card danger">
+        <div class="stat-icon danger">
+          <i class="fa-solid fa-credit-card"></i>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Total Dépenses</div>
+          <div class="stat-value" id="stat-depenses">—</div>
+          <div class="stat-sub" id="stat-depenses-nb">— dépenses</div>
+        </div>
+      </div>
+
+      <div class="stat-card gold">
+        <div class="stat-icon gold">
+          <i class="fa-solid fa-scale-balanced"></i>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Solde Global</div>
+          <div class="stat-value" id="stat-solde">—</div>
+          <div class="stat-sub">cotisations − dépenses</div>
+        </div>
+      </div>
+
+      <div class="stat-card info">
+        <div class="stat-icon info">
+          <i class="fa-solid fa-calendar-days"></i>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Événements</div>
+          <div class="stat-value" id="stat-evenements">—</div>
+          <div class="stat-sub">au total</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <i class="fa-solid fa-rocket"></i>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Projets en cours</div>
+          <div class="stat-value" id="stat-projets">—</div>
+          <div class="stat-sub" id="stat-projets-total">— projets au total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Graphiques ─── -->
+    <div class="charts-grid">
+      <div class="card chart-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-chart-column"></i>
+            Entrées vs Sorties (6 derniers mois)
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="chart-income-expense"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-chart-pie"></i>
+            Répartition dépenses
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="chart-categories-db"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Dernières transactions ─── -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-users"></i>
+          5 dernières transactions
+        </h2>
+        <a href="bilan.html" class="btn btn-outline btn-sm">Voir tout →</a>
+      </div>
+      <div class="card-body">
+        <div class="transaction-list" id="recent-transactions">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import './js/auth.js';
+  import { logout } from './js/auth.js';
+  import { db }     from './js/firebase-config.js';
+  import { formatCurrency, fmtDate } from './js/utils.js';
+  import { createIncomeExpenseChart, createCategoryPieChart } from './js/charts.js';
+  import {
+    collection, onSnapshot, query, orderBy, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // Déconnexion
+  document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
+
+  // Date actuelle
+  const liveDateEl = document.getElementById('live-date');
+  if (liveDateEl) liveDateEl.textContent = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Hamburger
+  const hamburger = document.getElementById('hamburger');
+  const navDrawer = document.getElementById('nav-drawer');
+  if (hamburger && navDrawer) {
+    hamburger.addEventListener('click', () => navDrawer.classList.toggle('open'));
+  }
+
+  // ─── Chargement des données ───
+  let cotisations = [], depenses = [], evenements = [], projets = [];
+
+  function refreshStats() {
+    const totalCot = cotisations.filter(c => c.statut === 'payé').reduce((s,c) => s + (Number(c.montant)||0), 0);
+    const totalDep = depenses.reduce((s,d) => s + (Number(d.montant)||0), 0);
+    const solde    = totalCot - totalDep;
+
+    setText('stat-cotisations',    formatCurrency(totalCot));
+    setText('stat-cotisations-nb', `${cotisations.filter(c=>c.statut==='payé').length} paiements reçus`);
+    setText('stat-depenses',       formatCurrency(totalDep));
+    setText('stat-depenses-nb',    `${depenses.length} dépenses`);
+
+    const soldeEl = document.getElementById('stat-solde');
+    if (soldeEl) {
+      soldeEl.textContent = formatCurrency(solde);
+      soldeEl.style.color = solde >= 0 ? 'var(--success)' : 'var(--danger)';
+    }
+
+    setText('stat-evenements', evenements.length);
+    const enCours = projets.filter(p => p.statut === 'en cours').length;
+    setText('stat-projets', enCours);
+    setText('stat-projets-total', `${projets.length} projets au total`);
+
+    refreshCharts(totalCot, totalDep);
+    refreshRecentTransactions();
+  }
+
+  function refreshCharts(totalCot, totalDep) {
+    // Barres : 6 derniers mois
+    const now = new Date();
+    const months = [];
+    const incomeData = [];
+    const expenseData = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }));
+
+      const income = cotisations.filter(c => {
+        if (c.statut !== 'payé') return false;
+        const cd = c.date?.toDate ? c.date.toDate() : new Date(c.date || 0);
+        return cd.getMonth() === d.getMonth() && cd.getFullYear() === d.getFullYear();
+      }).reduce((s, c) => s + (Number(c.montant)||0), 0);
+
+      const expense = depenses.filter(dep => {
+        const dd = dep.date?.toDate ? dep.date.toDate() : new Date(dep.date || 0);
+        return dd.getMonth() === d.getMonth() && dd.getFullYear() === d.getFullYear();
+      }).reduce((s, dep) => s + (Number(dep.montant)||0), 0);
+
+      incomeData.push(income);
+      expenseData.push(expense);
+    }
+    createIncomeExpenseChart('chart-income-expense', months, incomeData, expenseData);
+
+    // Camembert catégories
+    const catMap = {};
+    depenses.forEach(d => {
+      const c = d.categorie || 'autre';
+      catMap[c] = (catMap[c] || 0) + (Number(d.montant)||0);
+    });
+    if (Object.keys(catMap).length > 0) {
+      createCategoryPieChart('chart-categories-db', Object.keys(catMap), Object.values(catMap));
+    }
+  }
+
+  function refreshRecentTransactions() {
+    const container = document.getElementById('recent-transactions');
+    if (!container) return;
+
+    // Combiner cotisations payées + dépenses, trier par date desc, prendre 5
+    const combined = [
+      ...cotisations.filter(c => c.statut === 'payé').map(c => ({
+        ...c, _type: 'income', _label: c.membre, _date: c.date
+      })),
+      ...depenses.map(d => ({
+        ...d, _type: 'expense', _label: d.titre, _date: d.date
+      }))
+    ].sort((a, b) => {
+      const da = a._date?.toDate ? a._date.toDate() : new Date(a._date || 0);
+      const db2 = b._date?.toDate ? b._date.toDate() : new Date(b._date || 0);
+      return db2 - da;
+    }).slice(0, 5);
+
+    if (combined.length === 0) {
+      container.innerHTML = `<div class="empty-state"><p>Aucune transaction enregistrée</p></div>`;
+      return;
+    }
+
+    container.innerHTML = combined.map(item => {
+      const date  = item._date?.toDate ? item._date.toDate() : new Date(item._date || 0);
+      const isInc = item._type === 'income';
+      return `
+        <div class="transaction-item">
+          <div class="transaction-icon ${isInc ? 'income' : 'expense'}">
+            ${isInc ? '<i class="fa-solid fa-arrow-up"></i>' : '<i class="fa-solid fa-arrow-down"></i>'}
+          </div>
+          <div class="transaction-info">
+            <div class="transaction-name">${escHtml(item._label)}</div>
+            <div class="transaction-date">${fmtDate(date)} ${isInc ? '• Cotisation' : `• ${item.categorie || 'Dépense'}`}</div>
+          </div>
+          <div class="transaction-amount ${isInc ? 'income' : 'expense'}">
+            ${isInc ? '+' : '−'}${formatCurrency(item.montant)}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ─── Snapshots Firestore ───
+  onSnapshot(query(collection(db, 'cotisations'), orderBy('date', 'desc')), snap => {
+    cotisations = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshStats();
+  });
+  onSnapshot(query(collection(db, 'depenses'), orderBy('date', 'desc')), snap => {
+    depenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshStats();
+  });
+  onSnapshot(collection(db, 'evenements'), snap => {
+    evenements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshStats();
+  });
+  onSnapshot(collection(db, 'projets'), snap => {
+    projets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshStats();
+  });
+
+  // ─── Helpers ───
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+  function escHtml(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>

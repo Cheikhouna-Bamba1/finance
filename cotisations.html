@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotisations — Dahira Maftikhoul Jinan</title>
+  <meta name="description" content="Gestion des cotisations des membres de la Dahira Maftikhoul Jinan." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+      <img src="WhatsApp Image 2026-06-24 at 11.21.32.jpeg" alt="Logo Dahira Maftikhoul Jinan" class="brand-logo" />
+    <div><span>Dahira Maftikhoul Jinan<small>Gestion Financière</small></span></div>
+  </div>
+  <div class="navbar-menu">
+    <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
+    <a href="cotisations.html" class="nav-link active"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
+    <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
+    <a href="evenements.html"  class="nav-link"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
+    <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
+    <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
+  </div>
+  <div class="navbar-actions">
+    <div class="navbar-user">
+      <i class="fa-solid fa-user"></i>
+      <span id="nav-user-email"></span>
+    </div>
+    <button class="btn-logout" id="logout-btn">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      Déconnexion
+    </button>
+  </div>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="nav-drawer" id="nav-drawer">
+  <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
+  <a href="cotisations.html" class="nav-link active"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
+  <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
+  <a href="evenements.html"  class="nav-link"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
+  <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
+  <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
+  <button class="btn-logout" style="margin-top:auto" id="logout-btn-m">🚪 Déconnexion</button>
+</div>
+
+<!-- CONTENU -->
+<div class="page-wrapper">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <i class="fa-solid fa-sack-dollar"></i>
+          Cotisations
+        </h1>
+        <p class="page-subtitle">Gérez les cotisations des membres</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <i class="fa-solid fa-plus"></i>
+        Ajouter une cotisation
+      </button>
+    </div>
+
+    <!-- Tableau -->
+    <div class="card">
+      <!-- Filtres -->
+      <div class="filters-bar">
+        <div class="search-input">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search-membre" placeholder="Rechercher un membre…" />
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-sm btn-outline filter-btn active" data-statut="tous">Tous</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-statut="payé">
+            <i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Payé
+          </button>
+          <button class="btn btn-sm btn-outline filter-btn" data-statut="non payé">
+            <i class="fa-solid fa-clock" style="color:var(--warning)"></i> Non payé
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Membre</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Événement</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cotisations-tbody">
+            <tr class="loading-row"><td colspan="7"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total -->
+      <div class="table-footer">
+        <span>Total des cotisations perçues :</span>
+        <span id="total-cotisations">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL COTISATION ═══ -->
+<div class="modal-overlay" id="modal-cotisation-overlay" data-modal="modal-cotisation">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-cotisation-title">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-cotisation-title">
+        <i class="fa-solid fa-plus"></i>
+        Ajouter une cotisation
+      </h2>
+      <button class="modal-close" onclick="closeModal('modal-cotisation')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="form-cotisation">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="cot-membre">Nom du membre *</label>
+            <input type="text" id="cot-membre" required placeholder="Prénom Nom" />
+          </div>
+          <div class="form-group">
+            <label for="cot-montant">Montant (FCFA) *</label>
+            <input type="number" id="cot-montant" required min="0" step="100" placeholder="5000" />
+          </div>
+          <div class="form-group">
+            <label for="cot-date">Date *</label>
+            <input type="date" id="cot-date" required />
+          </div>
+          <div class="form-group">
+            <label for="cot-statut">Statut *</label>
+            <select id="cot-statut">
+              <option value="payé">Payé</option>
+              <option value="non payé">Non payé</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cot-evenement">Événement lié (optionnel)</label>
+            <select id="cot-evenement">
+              <option value="">-- Aucun événement --</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label for="cot-notes">Notes (optionnel)</label>
+            <textarea id="cot-notes" placeholder="Informations complémentaires…"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-cotisation')">Annuler</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i>
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import './js/auth.js';
+  import { logout } from './js/auth.js';
+  import './js/cotisations.js';
+  import './js/utils.js';
+
+  document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('logout-btn-m')?.addEventListener('click', logout);
+
+  const hamburger = document.getElementById('hamburger');
+  const navDrawer = document.getElementById('nav-drawer');
+  if (hamburger && navDrawer) {
+    hamburger.addEventListener('click', () => navDrawer.classList.toggle('open'));
+  }
+
+  // Définir date du jour par défaut
+  const dateInput = document.getElementById('cot-date');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dépenses — Dahira Maftikhoul Jinan</title>
+  <meta name="description" content="Gestion des dépenses de la Dahira Maftikhoul Jinan." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+      <img src="WhatsApp Image 2026-06-24 at 11.21.32.jpeg" alt="Logo Dahira Maftikhoul Jinan" class="brand-logo" />
+    <div><span>Dahira Maftikhoul Jinan<small>Gestion Financière</small></span></div>
+  </div>
+  <div class="navbar-menu">
+    <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
+    <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
+    <a href="depenses.html"    class="nav-link active"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
+    <a href="evenements.html"  class="nav-link"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
+    <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
+    <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
+  </div>
+  <div class="navbar-actions">
+    <div class="navbar-user">
+      <i class="fa-solid fa-user"></i>
+      <span id="nav-user-email"></span>
+    </div>
+    <button class="btn-logout" id="logout-btn">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      Déconnexion
+    </button>
+  </div>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="nav-drawer" id="nav-drawer">
+  <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
+  <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
+  <a href="depenses.html"    class="nav-link active"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
+  <a href="evenements.html"  class="nav-link"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
+  <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
+  <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
+  <button class="btn-logout" style="margin-top:auto" id="logout-btn-m">🚪 Déconnexion</button>
+</div>
+
+<!-- CONTENU -->
+<div class="page-wrapper">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <i class="fa-solid fa-credit-card"></i>
+          Dépenses
+        </h1>
+        <p class="page-subtitle">Enregistrez et suivez toutes les dépenses de l'association</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddDepense()">
+        <i class="fa-solid fa-plus"></i>
+        Ajouter une dépense
+      </button>
+    </div>
+
+    <!-- Tableau -->
+    <div class="card">
+      <div class="filters-bar">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-sm btn-outline filter-btn active" data-cat="toutes">Toutes</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-cat="nourriture"><i class="fa-solid fa-utensils"></i> Nourriture</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-cat="location"><i class="fa-solid fa-house"></i> Location</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-cat="transport"><i class="fa-solid fa-car"></i> Transport</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-cat="équipement"><i class="fa-solid fa-screwdriver-wrench"></i> Équipement</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-cat="communication"><i class="fa-solid fa-mobile-screen"></i> Communication</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-cat="autre"><i class="fa-solid fa-box"></i> Autre</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Titre</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Catégorie</th>
+              <th>Événement / Projet</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="depenses-tbody">
+            <tr class="loading-row"><td colspan="6"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span>Total des dépenses :</span>
+        <span id="total-depenses">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL DÉPENSE ═══ -->
+<div class="modal-overlay" id="modal-depense-overlay" data-modal="modal-depense">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-depense-title">
+        <i class="fa-solid fa-plus"></i>
+        Ajouter une dépense
+      </h2>
+      <button class="modal-close" onclick="closeModal('modal-depense')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="form-depense">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="dep-titre">Titre *</label>
+            <input type="text" id="dep-titre" required placeholder="Ex: Achat de chaises" />
+          </div>
+          <div class="form-group">
+            <label for="dep-montant">Montant (FCFA) *</label>
+            <input type="number" id="dep-montant" required min="0" step="100" placeholder="15000" />
+          </div>
+          <div class="form-group">
+            <label for="dep-date">Date *</label>
+            <input type="date" id="dep-date" required />
+          </div>
+          <div class="form-group">
+            <label for="dep-categorie">Catégorie *</label>
+            <select id="dep-categorie">
+              <option value="nourriture">Nourriture</option>
+              <option value="location">Location</option>
+              <option value="transport">Transport</option>
+              <option value="équipement">Équipement</option>
+              <option value="communication">Communication</option>
+              <option value="autre" selected>Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="dep-evenement">Événement lié (optionnel)</label>
+            <select id="dep-evenement">
+              <option value="">-- Aucun événement --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="dep-projet">Projet lié (optionnel)</label>
+            <select id="dep-projet">
+              <option value="">-- Aucun projet --</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label for="dep-notes">Notes (optionnel)</label>
+            <textarea id="dep-notes" placeholder="Informations complémentaires…"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-depense')">Annuler</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i>
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import './js/auth.js';
+  import { logout } from './js/auth.js';
+  import './js/depenses.js';
+  import './js/utils.js';
+
+  document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('logout-btn-m')?.addEventListener('click', logout);
+
+  const hamburger = document.getElementById('hamburger');
+  const navDrawer = document.getElementById('nav-drawer');
+  if (hamburger && navDrawer) hamburger.addEventListener('click', () => navDrawer.classList.toggle('open'));
+
+  const dateInput = document.getElementById('dep-date');
+  if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
