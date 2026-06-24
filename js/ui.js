@@ -2,6 +2,7 @@ import { logout } from './auth.js';
 
 document.getElementById('logout-btn')?.addEventListener('click', logout);
 document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
+document.getElementById('logout-btn-icon')?.addEventListener('click', logout);
 
 const hamburger = document.getElementById('hamburger');
 const navDrawer = document.getElementById('nav-drawer');

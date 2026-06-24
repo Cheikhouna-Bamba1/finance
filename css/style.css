@@ -41,6 +41,8 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   min-height: -webkit-fill-available;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -276,7 +278,13 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .nav-drawer .btn-logout i { margin-right: 6px; }
 
 /* Main layout */
-.page-wrapper { padding-top: var(--navbar-h); min-height: 100vh; }
+.page-wrapper {
+  padding-top: var(--navbar-h);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
 .container {
   max-width: 1280px;
@@ -478,6 +486,23 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 .btn-logout:hover { background: rgba(220,53,69,.7); }
+
+.btn-logout-icon {
+  display: none;
+  width: 38px; height: 38px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-sm);
+  color: var(--white);
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: var(--transition);
+  outline: none;
+}
+.btn-logout-icon:hover { background: rgba(220,53,69,.7); }
 
 /* Tables */
 .table-wrapper {
@@ -805,6 +830,7 @@ tbody td { padding: .8rem 1rem; color: var(--gray-700); vertical-align: middle; 
   .navbar-menu    { display: none; }
   .navbar-actions { display: none; }
   .hamburger      { display: flex; }
+  .btn-logout-icon { display: flex; }
 }
 
 @supports (padding: max(0px)) {
