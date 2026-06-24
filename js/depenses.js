@@ -1,26 +1,20 @@
-// ============================================================
-//  depenses.js — Gestion des dépenses
-// ============================================================
 import { db }              from './firebase-config.js';
-import { showToast, fmtDate, confirmDialog, formatCurrency } from './utils.js';
+import { showToast, fmtDate, confirmDialog, formatCurrency, escHtml } from './utils.js';
 import {
   collection, addDoc, updateDoc, deleteDoc,
   doc, onSnapshot, query, orderBy, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ─── Refs Firestore ───
 const depensesRef  = collection(db, 'depenses');
 const evenementsRef= collection(db, 'evenements');
 const projetsRef   = collection(db, 'projets');
 
-// ─── État local ───
 let allDepenses   = [];
 let allEvenements = [];
 let allProjets    = [];
 let editingId     = null;
 let filterCat     = 'toutes';
 
-// ─── DOM ───
 const tbody      = document.getElementById('depenses-tbody');
 const totalEl    = document.getElementById('total-depenses');
 const form       = document.getElementById('form-depense');
@@ -28,13 +22,11 @@ const modalTitle = document.getElementById('modal-depense-title');
 const evSel      = document.getElementById('dep-evenement');
 const projSel    = document.getElementById('dep-projet');
 
-// ─── Chargement événements ───
 onSnapshot(query(evenementsRef, orderBy('date','desc')), snap => {
   allEvenements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   populateSelect(evSel, allEvenements, '-- Aucun événement --');
 });
 
-// ─── Chargement projets ───
 onSnapshot(query(projetsRef, orderBy('nom')), snap => {
   allProjets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   populateSelect(projSel, allProjets, '-- Aucun projet --');
@@ -53,13 +45,11 @@ function populateSelect(sel, items, placeholder) {
   });
 }
 
-// ─── Chargement dépenses en temps réel ───
 onSnapshot(query(depensesRef, orderBy('date','desc')), snap => {
   allDepenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderTable();
 });
 
-// ─── Rendu ───
 function renderTable() {
   if (!tbody) return;
 
@@ -70,7 +60,6 @@ function renderTable() {
   tbody.innerHTML = '';
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center" style="padding:2rem;color:var(--gray-400);">Aucune dépense trouvée</td></tr>`;
     if (totalEl) totalEl.textContent = '0 FCFA';
     return;
   }
@@ -92,11 +81,11 @@ function renderTable() {
       <td class="fw-bold text-danger">${formatCurrency(d.montant)}</td>
       <td>${dateStr}</td>
       <td>${catBadge}</td>
-      <td>${ref}</td>
+      <td class="table-mobile-hide">${ref}</td>
       <td>
         <div class="d-flex gap-1">
           <button class="btn btn-sm btn-outline btn-icon" title="Modifier" onclick="openEditDepense('${d.id}')">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <i class="fa-solid fa-pen"></i>
           </button>
           <button class="btn btn-sm btn-danger btn-icon" title="Supprimer" onclick="deleteDepense('${d.id}','${escHtml(d.titre)}')">
             <i class="fa-solid fa-trash"></i>
@@ -111,18 +100,17 @@ function renderTable() {
 
 function catBadgeHtml(cat) {
   const map = {
-    'nourriture':    ['badge-success', '🍽️'],
-    'location':      ['badge-info',    '🏠'],
-    'transport':     ['badge-warning', '🚗'],
-    'équipement':    ['badge-gray',    '🔧'],
-    'communication': ['badge-info',    '📱'],
-    'autre':         ['badge-gray',    '📦'],
+    'nourriture':    ['badge-success', '<i class="fa-solid fa-utensils"></i>'],
+    'location':      ['badge-info',    '<i class="fa-solid fa-house"></i>'],
+    'transport':     ['badge-warning', '<i class="fa-solid fa-car"></i>'],
+    'équipement':    ['badge-gray',    '<i class="fa-solid fa-wrench"></i>'],
+    'communication': ['badge-info',    '<i class="fa-solid fa-mobile-screen"></i>'],
+    'autre':         ['badge-gray',    '<i class="fa-solid fa-box"></i>'],
   };
-  const [cls, ico] = map[cat] || ['badge-gray', '📦'];
-  return `<span class="badge ${cls}">${ico} ${escHtml(cat || 'autre')}</span>`;
+  const [cls, ico] = map[cat] || ['badge-gray', '<i class="fa-solid fa-box"></i>'];
+  return `<span class="badge ${cls}" style="gap:5px;display:inline-flex;align-items:center;">${ico} ${escHtml(cat || 'autre')}</span>`;
 }
 
-// ─── Filtres catégorie ───
 document.querySelectorAll('.filter-btn[data-cat]').forEach(btn => {
   btn.addEventListener('click', () => {
     filterCat = btn.dataset.cat;
@@ -132,7 +120,6 @@ document.querySelectorAll('.filter-btn[data-cat]').forEach(btn => {
   });
 });
 
-// ─── Ouvrir modal ajout ───
 window.openAddDepense = function() {
   editingId = null;
   form.reset();
@@ -140,7 +127,6 @@ window.openAddDepense = function() {
   openModal('modal-depense');
 };
 
-// ─── Ouvrir modal édition ───
 window.openEditDepense = function(id) {
   const d = allDepenses.find(x => x.id === id);
   if (!d) return;
@@ -156,7 +142,6 @@ window.openEditDepense = function(id) {
   openModal('modal-depense');
 };
 
-// ─── Supprimer ───
 window.deleteDepense = async function(id, titre) {
   const ok = await confirmDialog('Supprimer cette dépense ?', `"${titre}" sera définitivement supprimée.`);
   if (!ok) return;
@@ -168,7 +153,6 @@ window.deleteDepense = async function(id, titre) {
   }
 };
 
-// ─── Soumission formulaire ───
 if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -202,13 +186,8 @@ if (form) {
   });
 }
 
-// ─── Helpers ───
 function toInputDate(ts) {
   if (!ts) return '';
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toISOString().split('T')[0];
-}
-
-function escHtml(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

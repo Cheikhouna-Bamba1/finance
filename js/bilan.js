@@ -1,46 +1,68 @@
-// ============================================================
-//  bilan.js — Bilan global + Export PDF (jsPDF)
-// ============================================================
 import { db }                          from './firebase-config.js';
-import { formatCurrency, fmtDate }     from './utils.js';
+import { formatCurrency, showToast, escHtml } from './utils.js';
 import { createCategoryPieChart,
          createSoldeLineChart }         from './charts.js';
 import {
   collection, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ─── Refs ───
 const cotisationsRef = collection(db, 'cotisations');
 const depensesRef    = collection(db, 'depenses');
 const evenementsRef  = collection(db, 'evenements');
 const projetsRef     = collection(db, 'projets');
 
-// ─── État ───
 let allCotisations = [];
 let allDepenses    = [];
 let allEvenements  = [];
 let allProjets     = [];
 let periode        = 'tout';
 
-// ─── Chargement ───
-onSnapshot(query(cotisationsRef, orderBy('date','asc')), snap => {
-  allCotisations = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  refresh();
-});
-onSnapshot(query(depensesRef, orderBy('date','asc')), snap => {
-  allDepenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  refresh();
-});
-onSnapshot(query(evenementsRef, orderBy('date','desc')), snap => {
-  allEvenements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  refresh();
-});
-onSnapshot(query(projetsRef), snap => {
-  allProjets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  refresh();
-});
+const TOTAL_COLLECTIONS = 4;
+let loadedCollections = new Set();
+let initialLoadComplete = false;
 
-// ─── Filtre période ───
+function onCollectionUpdate(name, data, snap) {
+  data.length = 0;
+  data.push(...snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  if (!initialLoadComplete) {
+    loadedCollections.add(name);
+    if (loadedCollections.size === TOTAL_COLLECTIONS) {
+      initialLoadComplete = true;
+      refresh();
+    }
+  } else {
+    refresh();
+  }
+}
+
+function onCollectionError(name, error) {
+  showToast('Erreur de chargement', `Impossible de charger les ${name}. Vérifiez votre connexion.`, 'error');
+  if (!initialLoadComplete) {
+    loadedCollections.add(name);
+    if (loadedCollections.size === TOTAL_COLLECTIONS) {
+      initialLoadComplete = true;
+      refresh();
+    }
+  }
+}
+
+onSnapshot(query(cotisationsRef, orderBy('date','asc')),
+  snap => onCollectionUpdate('cotisations', allCotisations, snap),
+  err => onCollectionError('cotisations', err)
+);
+onSnapshot(query(depensesRef, orderBy('date','asc')),
+  snap => onCollectionUpdate('depenses', allDepenses, snap),
+  err => onCollectionError('dépenses', err)
+);
+onSnapshot(query(evenementsRef, orderBy('date','desc')),
+  snap => onCollectionUpdate('evenements', allEvenements, snap),
+  err => onCollectionError('événements', err)
+);
+onSnapshot(query(projetsRef),
+  snap => onCollectionUpdate('projets', allProjets, snap),
+  err => onCollectionError('projets', err)
+);
+
 function filterByPeriod(items, field) {
   if (periode === 'tout') return items;
   const now  = new Date();
@@ -58,7 +80,6 @@ function filterByPeriod(items, field) {
   });
 }
 
-// ─── Rafraîchissement ───
 function refresh() {
   const cotis    = filterByPeriod(allCotisations, 'date').filter(c => c.statut === 'payé');
   const deps     = filterByPeriod(allDepenses, 'date');
@@ -66,36 +87,24 @@ function refresh() {
   const totalDep = deps.reduce((s, d) =>  s + (Number(d.montant) || 0), 0);
   const solde    = totalCot - totalDep;
 
-  // Résumé principal
   setText('bilan-total-cot',  formatCurrency(totalCot));
   setText('bilan-total-dep',  formatCurrency(totalDep));
   setText('bilan-solde',      formatCurrency(solde));
   const soldeEl = document.getElementById('bilan-solde');
   if (soldeEl) soldeEl.className = `value fw-bold ${solde >= 0 ? 'positive' : 'negative'}`;
 
-  // Par événement
   renderEvenementsBilan(deps);
-
-  // Par projet
   renderProjetsBilan();
-
-  // Par catégorie
   renderCatsBilan(deps);
-
-  // Graphiques
   drawPieChart(deps);
   drawLineChart(cotis, deps);
 }
 
-// ─── Tableau événements ───
 function renderEvenementsBilan(deps) {
   const tbody = document.getElementById('bilan-ev-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  if (allEvenements.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Aucun événement</td></tr>';
-    return;
-  }
+  if (allEvenements.length === 0) return;
   allEvenements.forEach(ev => {
     const evDeps = deps.filter(d => d.evenement_id === ev.id);
     const total  = evDeps.reduce((s, d) => s + (Number(d.montant) || 0), 0);
@@ -111,33 +120,26 @@ function renderEvenementsBilan(deps) {
   });
 }
 
-// ─── Tableau projets ───
 function renderProjetsBilan() {
   const tbody = document.getElementById('bilan-proj-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  if (allProjets.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Aucun projet</td></tr>';
-    return;
-  }
+  if (allProjets.length === 0) return;
   allProjets.forEach(p => {
     const cible    = Number(p.budget_cible)     || 0;
     const collecte = Number(p.montant_collecte)  || 0;
-    const pct      = cible > 0 ? ((collecte / cible) * 100).toFixed(0) : 0;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escHtml(p.nom)}</td>
       <td>${formatCurrency(cible)}</td>
       <td>${formatCurrency(collecte)}</td>
       <td>
-        <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
-        <small>${pct}% — <span class="badge ${p.statut==='terminé'?'badge-success':'badge-info'}">${p.statut}</span></small>
+        <span class="badge ${p.statut==='terminé'?'badge-success':'badge-info'}">${p.statut === 'terminé' ? '<i class="fa-solid fa-check" style="margin-right:4px;"></i> Terminé' : '<i class="fa-solid fa-hourglass-half" style="margin-right:4px;"></i> En cours'}</span>
       </td>`;
     tbody.appendChild(tr);
   });
 }
 
-// ─── Tableau catégories ───
 function renderCatsBilan(deps) {
   const tbody = document.getElementById('bilan-cat-tbody');
   if (!tbody) return;
@@ -147,22 +149,15 @@ function renderCatsBilan(deps) {
     const c = d.categorie || 'autre';
     catMap[c] = (catMap[c] || 0) + (Number(d.montant) || 0);
   });
-  const total = Object.values(catMap).reduce((s, v) => s + v, 0);
   Object.entries(catMap).sort((a, b) => b[1] - a[1]).forEach(([cat, mt]) => {
-    const pct = total > 0 ? ((mt / total) * 100).toFixed(1) : 0;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="text-capitalize">${escHtml(cat)}</td>
-      <td>${formatCurrency(mt)}</td>
-      <td>${pct}%</td>`;
+      <td>${formatCurrency(mt)}</td>`;
     tbody.appendChild(tr);
   });
-  if (Object.keys(catMap).length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Aucune dépense</td></tr>';
-  }
 }
 
-// ─── Graphique camembert ───
 function drawPieChart(deps) {
   const catMap = {};
   deps.forEach(d => {
@@ -176,9 +171,7 @@ function drawPieChart(deps) {
   }
 }
 
-// ─── Graphique courbe solde ───
 function drawLineChart(cotis, deps) {
-  // Grouper par mois
   const map = {};
   [...cotis, ...deps].forEach(item => {
     const ts = item.date;
@@ -209,7 +202,6 @@ function drawLineChart(cotis, deps) {
   }
 }
 
-// ─── Boutons période ───
 document.querySelectorAll('.period-tab').forEach(btn => {
   btn.addEventListener('click', () => {
     periode = btn.dataset.periode;
@@ -219,186 +211,224 @@ document.querySelectorAll('.period-tab').forEach(btn => {
   });
 });
 
-// ─── Export PDF ───
 window.exportPDF = function() {
-  if (typeof window.jspdf === 'undefined') {
-    alert('jsPDF non chargé. Vérifiez votre connexion internet.');
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  try {
+    const jspdfLib = window.jspdf || window.jsPDF;
+    if (!jspdfLib) {
+      alert('jsPDF non chargé. Vérifiez votre connexion internet.');
+      return;
+    }
+    const jsPDF = jspdfLib.jsPDF || jspdfLib;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-  const cotis    = filterByPeriod(allCotisations, 'date').filter(c => c.statut === 'payé');
-  const deps     = filterByPeriod(allDepenses, 'date');
-  const totalCot = cotis.reduce((s, c) => s + (Number(c.montant) || 0), 0);
-  const totalDep = deps.reduce((s, d) =>  s + (Number(d.montant) || 0), 0);
-  const solde    = totalCot - totalDep;
-  const now      = new Date();
+    const cleanDocText = doc.text.bind(doc);
+    doc.text = function(text, x, y, options) {
+      const safeText = String(text).replace(/\u202F|\u00A0/g, ' ');
+      return cleanDocText(safeText, x, y, options);
+    };
 
-  let y = 15;
-  const lm = 15; // left margin
-  const pw = 180; // page width usable
+    const cotis    = filterByPeriod(allCotisations, 'date').filter(c => c.statut === 'payé');
+    const deps     = filterByPeriod(allDepenses, 'date');
+    const totalCot = cotis.reduce((s, c) => s + (Number(c.montant) || 0), 0);
+    const totalDep = deps.reduce((s, d) =>  s + (Number(d.montant) || 0), 0);
+    const solde    = totalCot - totalDep;
+    const now      = new Date();
 
-  // ─── En-tête ───
-  doc.setFillColor(26, 92, 56);
-  doc.rect(0, 0, 210, 40, 'F');
+    let y = 15;
+    const lm = 15;
+    const pw = 180;
 
-  doc.setTextColor(200, 169, 81);
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text('DAHIRA MAFTIKHOUL JINAN', 105, 17, { align: 'center' });
+    doc.setFillColor(34, 60, 43);
+    doc.rect(0, 0, 210, 42, 'F');
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Bilan Financier', 105, 26, { align: 'center' });
+    doc.setDrawColor(200, 169, 81);
+    doc.setLineWidth(0.8);
+    doc.line(15, 42, 195, 42);
 
-  doc.setFontSize(9);
-  const periodLabel = { tout:'Toutes périodes', mois:'Ce mois', trimestre:'Ce trimestre', annee:'Cette année' }[periode] || '';
-  doc.text(`Période : ${periodLabel}  |  Généré le : ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR')}`, 105, 34, { align: 'center' });
-
-  y = 50;
-  doc.setTextColor(30, 30, 30);
-
-  // ─── Résumé ───
-  doc.setFontSize(13);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(26, 92, 56);
-  doc.text('RÉSUMÉ FINANCIER', lm, y); y += 7;
-
-  doc.setDrawColor(26, 92, 56);
-  doc.setLineWidth(0.5);
-  doc.line(lm, y, lm + pw, y); y += 5;
-
-  const summaryRows = [
-    ['Total des cotisations perçues', formatCurrency(totalCot)],
-    ['Total des dépenses',            formatCurrency(totalDep)],
-  ];
-  summaryRows.forEach(([label, val]) => {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(60, 60, 60);
-    doc.text(label, lm, y);
+    doc.setTextColor(200, 169, 81);
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text(val, lm + pw, y, { align: 'right' });
-    y += 7;
-  });
+    doc.text('DAHIRA MAFTIKHOUL JINAN', 105, 17, { align: 'center' });
 
-  // Solde net
-  doc.setFillColor(solde >= 0 ? 209 : 248, solde >= 0 ? 231 : 215, solde >= 0 ? 221 : 218);
-  doc.rect(lm, y-4, pw, 10, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.setTextColor(solde >= 0 ? 25 : 176, solde >= 0 ? 135 : 42, solde >= 0 ? 84 : 55);
-  doc.text('SOLDE NET', lm+2, y+3);
-  doc.text(formatCurrency(solde), lm + pw, y+3, { align: 'right' });
-  y += 16;
-
-  // ─── Par événement ───
-  if (allEvenements.length > 0) {
-    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(26, 92, 56);
-    doc.text('DÉTAIL PAR ÉVÉNEMENT', lm, y); y += 6;
-    doc.line(lm, y, lm + pw, y); y += 4;
+    doc.text('BILAN FINANCIER', 105, 27, { align: 'center' });
 
-    const evHeaders = ['Événement', 'Budget prévu', 'Dépenses réelles', 'Solde'];
-    const evColW    = [70, 35, 40, 35];
+    doc.setTextColor(200, 169, 81);
     doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setFillColor(26, 92, 56);
-    doc.rect(lm, y, pw, 7, 'F');
-    doc.setTextColor(255);
-    let x = lm + 2;
-    evHeaders.forEach((h, i) => { doc.text(h, x, y+5); x += evColW[i]; });
-    y += 7;
+    doc.setFont('helvetica', 'italic');
+    const periodLabel = { tout:'Toutes périodes', mois:'Ce mois', trimestre:'Ce trimestre', annee:'Cette année' }[periode] || '';
+    doc.text(`Période : ${periodLabel}`, 105, 36, { align: 'center' });
 
-    doc.setFont('helvetica', 'normal');
-    allEvenements.forEach((ev, idx) => {
-      const evDeps = deps.filter(d => d.evenement_id === ev.id);
-      const total  = evDeps.reduce((s, d) => s + (Number(d.montant)||0), 0);
-      const budget = Number(ev.budget_prevu)||0;
-      const sol    = budget - total;
-      if (idx % 2 === 0) {
+    y = 55;
+    doc.setTextColor(30, 30, 30);
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(34, 60, 43);
+    doc.text('RÉSUMÉ FINANCIER', lm, y); y += 8;
+
+    doc.setDrawColor(34, 60, 43);
+    doc.setLineWidth(0.8);
+    doc.line(lm, y, lm + pw, y); y += 6;
+
+    const summaryRows = [
+      ['Total des cotisations perçues', formatCurrency(totalCot)],
+      ['Total des dépenses',            formatCurrency(totalDep)],
+    ];
+    summaryRows.forEach(([label, val], idx) => {
+      if (idx === 0) {
         doc.setFillColor(245, 245, 245);
-        doc.rect(lm, y, pw, 6, 'F');
+        doc.rect(lm, y-4, pw, 8, 'F');
       }
-      doc.setTextColor(40, 40, 40);
-      x = lm + 2;
-      const vals = [ev.nom, formatCurrency(budget), formatCurrency(total), (sol>=0?'+':'')+formatCurrency(sol)];
-      vals.forEach((v, i) => {
-        if (i === 3) doc.setTextColor(sol >= 0 ? 25 : 176, sol >= 0 ? 135 : 42, sol >= 0 ? 84 : 55);
-        else         doc.setTextColor(40, 40, 40);
-        doc.text(String(v), x, y+4);
-        x += evColW[i];
-      });
-      y += 6;
-      if (y > 260) { doc.addPage(); y = 20; }
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text(label, lm+2, y+1);
+      doc.setFont('helvetica', 'bold');
+      doc.text(val, lm + pw, y+1, { align: 'right' });
+      y += 8;
     });
-    y += 6;
-  }
 
-  // ─── Par catégorie ───
-  const catMap = {};
-  deps.forEach(d => {
-    const c = d.categorie || 'autre';
-    catMap[c] = (catMap[c] || 0) + (Number(d.montant) || 0);
-  });
-
-  if (Object.keys(catMap).length > 0) {
-    doc.setFontSize(13);
+    doc.setFillColor(solde >= 0 ? 212 : 248, solde >= 0 ? 237 : 215, solde >= 0 ? 218 : 218);
+    doc.rect(lm, y-4, pw, 10, 'F');
+    doc.setDrawColor(solde >= 0 ? 34 : 176, solde >= 0 ? 60 : 42, solde >= 0 ? 43 : 55);
+    doc.setLineWidth(0.5);
+    doc.rect(lm, y-4, pw, 10);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(26, 92, 56);
-    doc.text('DÉPENSES PAR CATÉGORIE', lm, y); y += 6;
-    doc.line(lm, y, lm + pw, y); y += 4;
+    doc.setFontSize(12);
+    doc.setTextColor(solde >= 0 ? 34 : 176, solde >= 0 ? 60 : 42, solde >= 0 ? 43 : 55);
+    doc.text('SOLDE NET', lm+3, y+3);
+    doc.text(formatCurrency(solde), lm + pw, y+3, { align: 'right' });
+    y += 18;
 
-    const catHeaders = ['Catégorie', 'Montant', '% du total'];
-    const catColW    = [80, 50, 50];
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setFillColor(26, 92, 56);
-    doc.rect(lm, y, pw, 7, 'F');
-    doc.setTextColor(255);
-    x = lm + 2;
-    catHeaders.forEach((h, i) => { doc.text(h, x, y+5); x += catColW[i]; });
-    y += 7;
+    if (allEvenements.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(34, 60, 43);
+      doc.text('DÉTAIL PAR ÉVÉNEMENT', lm, y); y += 8;
+      doc.setDrawColor(34, 60, 43);
+      doc.setLineWidth(0.8);
+      doc.line(lm, y, lm + pw, y); y += 5;
 
-    const totalDeps = Object.values(catMap).reduce((s,v)=>s+v, 0);
+      const evHeaders = ['Événement', 'Budget prévu', 'Dépenses réelles', 'Solde'];
+      const evColW    = [68, 38, 38, 36];
+      const evColX    = [];
+      let cx = lm;
+      evColW.forEach(w => { evColX.push(cx); cx += w; });
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setFillColor(34, 60, 43);
+      doc.rect(lm, y, pw, 7, 'F');
+      doc.setTextColor(255);
+      evHeaders.forEach((h, i) => { doc.text(h, evColX[i] + 2, y+5); });
+      y += 7;
+
+      doc.setFont('helvetica', 'normal');
+      const rowH = 6;
+      allEvenements.forEach((ev, idx) => {
+        const evDeps = deps.filter(d => d.evenement_id === ev.id);
+        const total  = evDeps.reduce((s, d) => s + (Number(d.montant)||0), 0);
+        const budget = Number(ev.budget_prevu)||0;
+        const sol    = budget - total;
+
+        if (idx % 2 === 0) {
+          doc.setFillColor(245, 245, 245);
+          doc.rect(lm, y, pw, rowH, 'F');
+        }
+
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        evColX.forEach((x, i) => {
+          doc.rect(x, y, evColW[i], rowH);
+        });
+
+        const alignment = i => (i === 0 ? 'left' : 'right');
+        const vals = [ev.nom, formatCurrency(budget), formatCurrency(total), (sol>=0?'+':'')+formatCurrency(sol)];
+        vals.forEach((v, i) => {
+          if (i === 3) doc.setTextColor(sol >= 0 ? 25 : 176, sol >= 0 ? 135 : 42, sol >= 0 ? 84 : 55);
+          else         doc.setTextColor(40, 40, 40);
+          const px = (i === 0) ? evColX[i] + 2 : evColX[i] + evColW[i] - 2;
+          doc.text(String(v), px, y+4, { align: alignment(i) });
+        });
+        y += rowH;
+        if (y > 260) { doc.addPage(); y = 20; }
+      });
+      y += 8;
+    }
+
+    const catMap = {};
+    deps.forEach(d => {
+      const c = d.categorie || 'autre';
+      catMap[c] = (catMap[c] || 0) + (Number(d.montant) || 0);
+    });
+
+    if (Object.keys(catMap).length > 0) {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(34, 60, 43);
+      doc.text('DÉPENSES PAR CATÉGORIE', lm, y); y += 8;
+      doc.setDrawColor(34, 60, 43);
+      doc.setLineWidth(0.8);
+      doc.line(lm, y, lm + pw, y); y += 5;
+
+      const catHeaders = ['Catégorie', 'Montant'];
+      const catColW    = [110, 70];
+      const catColX    = [lm, lm + 110];
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setFillColor(34, 60, 43);
+      doc.rect(lm, y, pw, 7, 'F');
+      doc.setTextColor(255);
+      catHeaders.forEach((h, i) => { doc.text(h, catColX[i] + 2, y+5); });
+      y += 7;
+
+      doc.setFont('helvetica', 'normal');
+      const rowH = 6;
+      Object.entries(catMap).sort((a,b)=>b[1]-a[1]).forEach(([cat, mt], idx) => {
+        if (idx % 2 === 0) { doc.setFillColor(245,245,245); doc.rect(lm, y, pw, rowH, 'F'); }
+
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        catColX.forEach((x, i) => {
+          doc.rect(x, y, catColW[i], rowH);
+        });
+
+        doc.setTextColor(40, 40, 40);
+        const label = cat.charAt(0).toUpperCase() + cat.slice(1);
+        doc.text(label, catColX[0] + 2, y+4);
+        doc.setFont('helvetica', 'bold');
+        doc.text(formatCurrency(mt), catColX[1] + catColW[1] - 2, y+4, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        y += rowH;
+      });
+      y += 8;
+    }
+
+    if (y > 260) { doc.addPage(); y = 20; }
+    y = Math.max(y, 265);
+    doc.setDrawColor(200, 169, 81);
+    doc.setLineWidth(1);
+    doc.line(lm, y, lm + pw, y); y += 6;
+    doc.setFontSize(8);
+    doc.setTextColor(100);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Dahira Maftikhoul Jinan — Système de Gestion Financière', 105, y, { align: 'center' });
+    doc.text(`Document confidentiel — ${now.toLocaleDateString('fr-FR')}`, 105, y+4, { align: 'center' });
     doc.setFont('helvetica', 'normal');
-    Object.entries(catMap).sort((a,b)=>b[1]-a[1]).forEach(([cat, mt], idx) => {
-      const pct = totalDeps > 0 ? ((mt/totalDeps)*100).toFixed(1) : '0.0';
-      if (idx % 2 === 0) { doc.setFillColor(245,245,245); doc.rect(lm, y, pw, 6, 'F'); }
-      doc.setTextColor(40, 40, 40);
-      x = lm + 2;
-      [cat.charAt(0).toUpperCase()+cat.slice(1), formatCurrency(mt), pct+'%'].forEach((v, i) => {
-        doc.text(v, x, y+4); x += catColW[i];
-      });
-      y += 6;
-    });
-    y += 6;
+
+    const filename = `bilan-dahira-${now.toISOString().split('T')[0]}.pdf`;
+    doc.save(filename);
+
+  } catch (err) {
+    alert('Erreur: ' + err.message);
   }
-
-  // ─── Pied de page ───
-  if (y > 260) { doc.addPage(); y = 20; }
-  y = Math.max(y, 265);
-  doc.setDrawColor(200, 169, 81);
-  doc.setLineWidth(0.5);
-  doc.line(lm, y, lm + pw, y); y += 5;
-  doc.setFontSize(8);
-  doc.setTextColor(120);
-  doc.setFont('helvetica', 'italic');
-  doc.text('Généré par le système de gestion Dahira Maftikhoul Jinan', 105, y, { align: 'center' });
-  doc.text(`Document confidentiel — ${now.toLocaleDateString('fr-FR')}`, 105, y+4, { align: 'center' });
-
-  doc.save(`bilan-dahira-${now.toISOString().split('T')[0]}.pdf`);
 };
 
-// ─── Helpers ───
 function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = val;
-}
-
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

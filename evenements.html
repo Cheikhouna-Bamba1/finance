@@ -5,26 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Événements — Dahira Maftikhoul Jinan</title>
   <meta name="description" content="Gestion des événements de la Dahira Maftikhoul Jinan." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
   <div class="navbar-brand">
-      <img src="WhatsApp Image 2026-06-24 at 11.21.32.jpeg" alt="Logo Dahira Maftikhoul Jinan" class="brand-logo" />
+    <img src="logo.jpeg" alt="Logo Dahira Maftikhoul Jinan" class="brand-logo" />
     <div><span>Dahira Maftikhoul Jinan<small>Gestion Financière</small></span></div>
   </div>
   <div class="navbar-menu">
-    <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
-    <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
-    <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
-    <a href="evenements.html"  class="nav-link active"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
-    <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
-    <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
+    <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie"></i> Tableau de bord</a>
+    <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar"></i> Cotisations</a>
+    <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer"></i> Dépenses</a>
+    <a href="evenements.html"  class="nav-link active"><i class="fa-solid fa-calendar-days"></i> Événements</a>
+    <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket"></i> Projets</a>
+    <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line"></i> Bilan</a>
   </div>
   <div class="navbar-actions">
     <div class="navbar-user">
@@ -36,19 +33,20 @@
       Déconnexion
     </button>
   </div>
-  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
 </nav>
+<div class="nav-overlay" id="nav-overlay"></div>
 <div class="nav-drawer" id="nav-drawer">
-  <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
-  <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
-  <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
-  <a href="evenements.html"  class="nav-link active"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
-  <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
-  <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
-  <button class="btn-logout" style="margin-top:auto" id="logout-btn-m">🚪 Déconnexion</button>
+  <a href="dashboard.html"   class="nav-link"><i class="fa-solid fa-chart-pie"></i> Tableau de bord</a>
+  <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar"></i> Cotisations</a>
+  <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer"></i> Dépenses</a>
+  <a href="evenements.html"  class="nav-link active"><i class="fa-solid fa-calendar-days"></i> Événements</a>
+  <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket"></i> Projets</a>
+  <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line"></i> Bilan</a>
+  <button class="btn-logout" id="logout-btn-mobile"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</button>
 </div>
 
-<!-- CONTENU -->
+
 <div class="page-wrapper">
   <div class="container">
     <div class="page-header">
@@ -73,14 +71,12 @@
               <th>Événement</th>
               <th>Date</th>
               <th>Budget prévu</th>
-              <th>Dépenses réelles</th>
-              <th>Solde</th>
-              <th>Avancement</th>
+              <th class="table-mobile-hide">Dépenses réelles</th>
+              <th class="table-mobile-hide">Solde</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="evenements-tbody">
-            <tr class="loading-row"><td colspan="7"><div class="spinner"></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -88,7 +84,7 @@
   </div>
 </div>
 
-<!-- ═══ MODAL ÉVÉNEMENT ═══ -->
+
 <div class="modal-overlay" id="modal-evenement-overlay" data-modal="modal-evenement">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-header">
@@ -133,17 +129,8 @@
 </div>
 
 <script type="module">
-  import './js/auth.js';
-  import { logout } from './js/auth.js';
+  import './js/ui.js';
   import './js/evenements.js';
-  import './js/utils.js';
-
-  document.getElementById('logout-btn').addEventListener('click', logout);
-  document.getElementById('logout-btn-m')?.addEventListener('click', logout);
-
-  const hamburger = document.getElementById('hamburger');
-  const navDrawer = document.getElementById('nav-drawer');
-  if (hamburger && navDrawer) hamburger.addEventListener('click', () => navDrawer.classList.toggle('open'));
 
   const dateInput = document.getElementById('ev-date');
   if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];

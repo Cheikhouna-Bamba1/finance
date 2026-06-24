@@ -1,13 +1,8 @@
-// ============================================================
-//  charts.js — Graphiques Chart.js
-// ============================================================
-
-// ─── Couleurs de la charte ───
 export const COLORS = {
-  green:      '#1a5c38',
-  greenMid:   '#236b44',
-  greenLight: '#2e8b57',
-  greenPale:  '#d4edda',
+  green:      '#223c2b',
+  greenMid:   '#335b41',
+  greenLight: '#467c58',
+  greenPale:  '#d8e6dd',
   gold:       '#c8a951',
   goldLight:  '#e0c46e',
   danger:     '#dc3545',
@@ -26,11 +21,10 @@ export const CAT_COLORS = {
   'autre':      COLORS.warning,
 };
 
-// ─── Défauts globaux Chart.js ───
 if (typeof Chart !== 'undefined') {
-  Chart.defaults.font.family = "'Poppins', sans-serif";
-  Chart.defaults.font.size   = 12;
-  Chart.defaults.color       = '#64748b';
+  Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = '#64748b';
   Chart.defaults.plugins.legend.position = 'bottom';
   Chart.defaults.plugins.legend.labels.padding = 20;
   Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.9)';
@@ -38,12 +32,9 @@ if (typeof Chart !== 'undefined') {
   Chart.defaults.plugins.tooltip.cornerRadius = 8;
 }
 
-// ─── Graphique Barres : Entrées vs Sorties ───
 export function createIncomeExpenseChart(canvasId, labels, incomeData, expenseData) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return null;
-
-  // Détruire le chart existant si besoin
   if (ctx._chart) ctx._chart.destroy();
 
   const chart = new Chart(ctx, {
@@ -54,7 +45,7 @@ export function createIncomeExpenseChart(canvasId, labels, incomeData, expenseDa
         {
           label: 'Cotisations (FCFA)',
           data: incomeData,
-          backgroundColor: 'rgba(26,92,56,.75)',
+          backgroundColor: 'rgba(34,60,43,.75)',
           borderColor: COLORS.green,
           borderWidth: 2,
           borderRadius: 6,
@@ -76,14 +67,16 @@ export function createIncomeExpenseChart(canvasId, labels, incomeData, expenseDa
         legend: { position: 'top' },
         tooltip: {
           callbacks: {
-            label: (ctx) => ` ${ctx.dataset.label}: ${formatAmount(ctx.parsed.y)}`
+            label: (ctx) => ' ' + ctx.dataset.label + ': ' + formatAmount(ctx.parsed.y)
           }
         }
       },
       scales: {
         y: {
           beginAtZero: true,
+          suggestedMax: 5000,
           ticks: {
+            stepSize: 1000,
             callback: (v) => formatAmount(v, true)
           },
           grid: { color: 'rgba(0,0,0,.05)' }
@@ -97,7 +90,6 @@ export function createIncomeExpenseChart(canvasId, labels, incomeData, expenseDa
   return chart;
 }
 
-// ─── Camembert : Dépenses par catégorie ───
 export function createCategoryPieChart(canvasId, categories, amounts) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return null;
@@ -125,7 +117,7 @@ export function createCategoryPieChart(canvasId, categories, amounts) {
         legend: { position: 'right' },
         tooltip: {
           callbacks: {
-            label: (ctx) => ` ${ctx.label}: ${formatAmount(ctx.parsed)}`
+            label: (ctx) => ' ' + ctx.label + ': ' + formatAmount(ctx.parsed)
           }
         }
       }
@@ -136,7 +128,6 @@ export function createCategoryPieChart(canvasId, categories, amounts) {
   return chart;
 }
 
-// ─── Courbe : Évolution du solde ───
 export function createSoldeLineChart(canvasId, labels, soldeData) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return null;
@@ -150,7 +141,7 @@ export function createSoldeLineChart(canvasId, labels, soldeData) {
         label: 'Solde (FCFA)',
         data: soldeData,
         borderColor: COLORS.green,
-        backgroundColor: 'rgba(26,92,56,.1)',
+        backgroundColor: 'rgba(34,60,43,.1)',
         borderWidth: 2.5,
         fill: true,
         tension: 0.4,
@@ -167,13 +158,18 @@ export function createSoldeLineChart(canvasId, labels, soldeData) {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => ` Solde: ${formatAmount(ctx.parsed.y)}`
+            label: (ctx) => ' Solde: ' + formatAmount(ctx.parsed.y)
           }
         }
       },
       scales: {
         y: {
-          ticks: { callback: (v) => formatAmount(v, true) },
+          beginAtZero: true,
+          suggestedMax: 5000,
+          ticks: {
+            stepSize: 1000,
+            callback: (v) => formatAmount(v, true)
+          },
           grid: { color: 'rgba(0,0,0,.05)' }
         },
         x: { grid: { display: false } }
@@ -185,7 +181,6 @@ export function createSoldeLineChart(canvasId, labels, soldeData) {
   return chart;
 }
 
-// ─── Helpers ───
 function formatAmount(n, short = false) {
   if (short && Math.abs(n) >= 1000) {
     return (n / 1000).toFixed(0) + 'k FCFA';

@@ -1,11 +1,8 @@
-// ============================================================
-//  projets.js — Gestion des projets
-// ============================================================
 import { db }              from './firebase-config.js';
-import { showToast, confirmDialog, formatCurrency } from './utils.js';
+import { showToast, confirmDialog, formatCurrency, escHtml } from './utils.js';
 import {
   collection, addDoc, updateDoc, deleteDoc,
-  doc, onSnapshot, query, orderBy, Timestamp
+  doc, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const projetsRef = collection(db, 'projets');
@@ -16,27 +13,21 @@ let editingId  = null;
 const tbody = document.getElementById('projets-tbody');
 const form  = document.getElementById('form-projet');
 
-// ─── Chargement en temps réel ───
 onSnapshot(query(projetsRef, orderBy('nom')), snap => {
   allProjets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderTable();
 });
 
-// ─── Rendu ───
 function renderTable() {
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  if (allProjets.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center" style="padding:2rem;color:var(--gray-400);">Aucun projet enregistré</td></tr>`;
-    return;
-  }
+  if (allProjets.length === 0) return;
 
   allProjets.forEach(p => {
     const cible     = Number(p.budget_cible)    || 0;
     const collecte  = Number(p.montant_collecte) || 0;
     const restant   = cible - collecte;
-    const pct       = cible > 0 ? Math.min(100, (collecte / cible) * 100) : 0;
     const isTermine = p.statut === 'terminé';
 
     const tr = document.createElement('tr');
@@ -47,16 +38,10 @@ function renderTable() {
       </td>
       <td class="fw-bold">${formatCurrency(cible)}</td>
       <td class="text-success fw-medium">${formatCurrency(collecte)}</td>
-      <td class="${restant > 0 ? 'text-danger' : 'text-success'} fw-medium">${restant > 0 ? formatCurrency(restant) : '✓ Atteint'}</td>
-      <td style="min-width:140px">
-        <div class="progress-wrap">
-          <div class="progress-bar ${pct >= 100 ? 'gold' : ''}" style="width:${pct.toFixed(0)}%"></div>
-        </div>
-        <small class="text-muted">${pct.toFixed(0)}%</small>
-      </td>
+      <td class="table-mobile-hide ${restant > 0 ? 'text-danger' : 'text-success'} fw-medium">${restant > 0 ? formatCurrency(restant) : '<i class="fa-solid fa-check-double" style="margin-right:4px;"></i> Atteint'}</td>
       <td>
         <span class="badge ${isTermine ? 'badge-success' : 'badge-info'}">
-          ${isTermine ? '✓ Terminé' : '⏳ En cours'}
+          ${isTermine ? '<i class="fa-solid fa-check" style="margin-right:4px;"></i> Terminé' : '<i class="fa-solid fa-hourglass-half" style="margin-right:4px;"></i> En cours'}
         </span>
       </td>
       <td>
@@ -66,7 +51,7 @@ function renderTable() {
             <i class="fa-solid fa-check"></i>
           </button>` : ''}
           <button class="btn btn-sm btn-outline btn-icon" title="Modifier" onclick="openEditProjet('${p.id}')">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <i class="fa-solid fa-pen"></i>
           </button>
           <button class="btn btn-sm btn-danger btn-icon" title="Supprimer" onclick="deleteProjet('${p.id}','${escHtml(p.nom)}')">
             <i class="fa-solid fa-trash"></i>
@@ -77,7 +62,6 @@ function renderTable() {
   });
 }
 
-// ─── Ouvrir modal ajout ───
 window.openAddProjet = function() {
   editingId = null;
   form.reset();
@@ -85,7 +69,6 @@ window.openAddProjet = function() {
   openModal('modal-projet');
 };
 
-// ─── Ouvrir modal édition ───
 window.openEditProjet = function(id) {
   const p = allProjets.find(x => x.id === id);
   if (!p) return;
@@ -99,17 +82,15 @@ window.openEditProjet = function(id) {
   openModal('modal-projet');
 };
 
-// ─── Marquer terminé ───
 window.markTermine = async function(id) {
   try {
     await updateDoc(doc(db, 'projets', id), { statut: 'terminé' });
-    showToast('Succès', 'Projet marqué comme terminé 🎉', 'success');
+    showToast('Succès', 'Projet marqué comme terminé !', 'success');
   } catch (e) {
     showToast('Erreur', e.message, 'error');
   }
 };
 
-// ─── Supprimer ───
 window.deleteProjet = async function(id, nom) {
   const ok = await confirmDialog('Supprimer ce projet ?', `"${nom}" sera définitivement supprimé.`);
   if (!ok) return;
@@ -121,7 +102,6 @@ window.deleteProjet = async function(id, nom) {
   }
 };
 
-// ─── Soumission formulaire ───
 if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -151,8 +131,4 @@ if (form) {
       btn.disabled = false;
     }
   });
-}
-
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

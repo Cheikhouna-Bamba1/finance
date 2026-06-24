@@ -1,0 +1,6 @@
+node_modules/
+package-lock.json
+test_jspdf.js
+test_jspdf2.js
+image.png
+imageCouleur.jpg

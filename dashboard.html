@@ -5,20 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tableau de bord — Dahira Maftikhoul Jinan</title>
   <meta name="description" content="Tableau de bord financier de la Dahira Maftikhoul Jinan. Résumé des cotisations, dépenses et solde en temps réel." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<!-- ═══════════════════════════════
-     NAVBAR
-════════════════════════════════ -->
 <nav class="navbar">
   <div class="navbar-brand">
-    <img src="WhatsApp Image 2026-06-24 at 11.21.32.jpeg" alt="Logo Dahira Maftikhoul Jinan" class="brand-logo" />
+    <img src="logo.jpeg" alt="Logo Dahira Maftikhoul Jinan" class="brand-logo" />
     <div>
       <span>Dahira Maftikhoul Jinan<small>Gestion Financière</small></span>
     </div>
@@ -26,29 +21,29 @@
 
   <div class="navbar-menu" id="navbar-menu">
     <a href="dashboard.html"   class="nav-link active" id="nl-dashboard">
-      <i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord
+      <i class="fa-solid fa-chart-pie"></i> Tableau de bord
     </a>
     <a href="cotisations.html" class="nav-link" id="nl-cotisations">
-      <i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations
+      <i class="fa-solid fa-sack-dollar"></i> Cotisations
     </a>
     <a href="depenses.html"    class="nav-link" id="nl-depenses">
-      <i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses
+      <i class="fa-solid fa-money-bill-transfer"></i> Dépenses
     </a>
     <a href="evenements.html"  class="nav-link" id="nl-evenements">
-      <i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements
+      <i class="fa-solid fa-calendar-days"></i> Événements
     </a>
     <a href="projets.html"     class="nav-link" id="nl-projets">
-      <i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets
+      <i class="fa-solid fa-rocket"></i> Projets
     </a>
     <a href="bilan.html"       class="nav-link" id="nl-bilan">
-      <i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan
+      <i class="fa-solid fa-chart-line"></i> Bilan
     </a>
   </div>
 
   <div class="navbar-actions">
     <div class="navbar-user">
       <i class="fa-solid fa-user"></i>
-      <span id="nav-user-email" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem;"></span>
+      <span id="nav-user-email"></span>
     </div>
     <button class="btn-logout" id="logout-btn">
       <i class="fa-solid fa-right-from-bracket"></i>
@@ -61,27 +56,24 @@
   </button>
 </nav>
 
-<!-- Mobile drawer -->
+
+<div class="nav-overlay" id="nav-overlay"></div>
 <div class="nav-drawer" id="nav-drawer">
-  <a href="dashboard.html"   class="nav-link active"><i class="fa-solid fa-chart-pie" style="margin-right:8px;"></i> Tableau de bord</a>
-  <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar" style="margin-right:8px;"></i> Cotisations</a>
-  <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer" style="margin-right:8px;"></i> Dépenses</a>
-  <a href="evenements.html"  class="nav-link"><i class="fa-solid fa-calendar-days" style="margin-right:8px;"></i> Événements</a>
-  <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket" style="margin-right:8px;"></i> Projets</a>
-  <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line" style="margin-right:8px;"></i> Bilan</a>
-  <button class="btn-logout" style="margin-top:auto" id="logout-btn-mobile">
+  <a href="dashboard.html"   class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Tableau de bord</a>
+  <a href="cotisations.html" class="nav-link"><i class="fa-solid fa-sack-dollar"></i> Cotisations</a>
+  <a href="depenses.html"    class="nav-link"><i class="fa-solid fa-money-bill-transfer"></i> Dépenses</a>
+  <a href="evenements.html"  class="nav-link"><i class="fa-solid fa-calendar-days"></i> Événements</a>
+  <a href="projets.html"     class="nav-link"><i class="fa-solid fa-rocket"></i> Projets</a>
+  <a href="bilan.html"       class="nav-link"><i class="fa-solid fa-chart-line"></i> Bilan</a>
+  <button class="btn-logout" id="logout-btn-mobile">
     <i class="fa-solid fa-right-from-bracket"></i>
     Déconnexion
   </button>
 </div>
 
-<!-- ═══════════════════════════════
-     CONTENU PRINCIPAL
-════════════════════════════════ -->
 <div class="page-wrapper">
   <div class="container">
 
-    <!-- En-tête -->
     <div class="page-header">
       <div>
         <h1 class="page-title">
@@ -90,12 +82,12 @@
         </h1>
         <p class="page-subtitle">Vue d'ensemble en temps réel des finances de l'association</p>
       </div>
-      <div style="display:flex;gap:.5rem;align-items:center">
-        <span id="live-date" style="font-size:.82rem;color:var(--gray-400)"></span>
+      <div class="d-flex gap-1 align-center">
+        <span id="live-date"></span>
       </div>
     </div>
 
-    <!-- ─── Cartes statistiques ─── -->
+
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon green">
@@ -153,7 +145,7 @@
       </div>
     </div>
 
-    <!-- ─── Graphiques ─── -->
+
     <div class="charts-grid">
       <div class="card chart-card">
         <div class="card-header">
@@ -184,7 +176,7 @@
       </div>
     </div>
 
-    <!-- ─── Dernières transactions ─── -->
+
     <div class="card mb-3">
       <div class="card-header">
         <h2 class="card-title">
@@ -204,29 +196,17 @@
 </div>
 
 <script type="module">
-  import './js/auth.js';
-  import { logout } from './js/auth.js';
+  import './js/ui.js';
   import { db }     from './js/firebase-config.js';
   import { formatCurrency, fmtDate } from './js/utils.js';
   import { createIncomeExpenseChart, createCategoryPieChart } from './js/charts.js';
   import {
-    collection, onSnapshot, query, orderBy, limit
+    collection, onSnapshot, query, orderBy
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  // Déconnexion
-  document.getElementById('logout-btn').addEventListener('click', logout);
-  document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
 
   // Date actuelle
   const liveDateEl = document.getElementById('live-date');
   if (liveDateEl) liveDateEl.textContent = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-
-  // Hamburger
-  const hamburger = document.getElementById('hamburger');
-  const navDrawer = document.getElementById('nav-drawer');
-  if (hamburger && navDrawer) {
-    hamburger.addEventListener('click', () => navDrawer.classList.toggle('open'));
-  }
 
   // ─── Chargement des données ───
   let cotisations = [], depenses = [], evenements = [], projets = [];
@@ -312,10 +292,7 @@
       return db2 - da;
     }).slice(0, 5);
 
-    if (combined.length === 0) {
-      container.innerHTML = `<div class="empty-state"><p>Aucune transaction enregistrée</p></div>`;
-      return;
-    }
+    if (combined.length === 0) return;
 
     container.innerHTML = combined.map(item => {
       const date  = item._date?.toDate ? item._date.toDate() : new Date(item._date || 0);

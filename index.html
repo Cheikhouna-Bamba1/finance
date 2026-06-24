@@ -5,33 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion — Dahira Maftikhoul Jinan</title>
   <meta name="description" content="Page de connexion sécurisée pour l'administration financière de la Dahira Maftikhoul Jinan." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    /* ─── Décorations supplémentaires page login ─── */
-    .login-page .deco-circle-1 {
-      position: absolute; width: 180px; height: 180px;
-      border: 2px solid rgba(200,169,81,.2);
-      border-radius: 50%; top: 10%; left: 5%; animation: rotate 20s linear infinite;
-    }
-    .login-page .deco-circle-2 {
-      position: absolute; width: 100px; height: 100px;
-      border: 2px solid rgba(255,255,255,.1);
-      border-radius: 50%; bottom: 15%; right: 8%; animation: rotate 15s linear infinite reverse;
-    }
-    @keyframes rotate { to { transform: rotate(360deg); } }
-
-    .input-icon { position: relative; }
-    .input-icon svg {
-      position: absolute; left: .9rem; top: 50%;
-      transform: translateY(-50%); width: 18px; height: 18px;
-      color: var(--gray-400); pointer-events: none;
-    }
-    .input-icon input { padding-left: 2.8rem; }
-
     .error-msg {
       background: var(--danger-light);
       color: var(--danger);
@@ -46,8 +21,6 @@
       display: none;
     }
 
-    .error-msg i { font-size: 1rem; flex-shrink: 0; }
-
     .error-msg.show { display: flex; }
 
     .login-btn-full {
@@ -58,73 +31,41 @@
       border-radius: var(--radius-md);
     }
 
-    .security-note {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: .75rem;
-      color: var(--gray-400);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .4rem;
-    }
-    .security-note svg { width: 14px; height: 14px; color: var(--green-mid); }
   </style>
 </head>
 <body class="login-page">
-  <div class="deco-circle-1"></div>
-  <div class="deco-circle-2"></div>
 
   <div class="login-card">
-    <!-- Logo -->
     <div class="login-logo">
       <img
-        src="WhatsApp Image 2026-06-24 at 11.21.32.jpeg"
+        src="logo.jpeg"
         alt="Logo Dahira Maftikhoul Jinan"
-        style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 8px 24px rgba(26,92,56,.35);margin:0 auto 1rem;display:block;"
       />
       <h1>Dahira Maftikhoul Jinan</h1>
     </div>
 
-
-
-    <!-- Formulaire -->
     <form id="login-form" novalidate>
       <div class="form-group mb-2">
         <label for="email">Adresse e-mail</label>
-        <div class="input-icon">
-          <i class="fa-solid fa-envelope"></i>
-          <input type="email" id="email" placeholder="admin@dahira.org" required autocomplete="email" />
-        </div>
+        <input type="email" id="email" required autocomplete="email" />
       </div>
 
       <div class="form-group mb-1">
         <label for="password">Mot de passe</label>
-        <div class="input-icon">
-          <i class="fa-solid fa-lock"></i>
-          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" />
-        </div>
+        <input type="password" id="password" required autocomplete="current-password" />
       </div>
 
-      <!-- Message d'erreur -->
       <div class="error-msg" id="error-msg">
-        <i class="fa-solid fa-circle-exclamation"></i>
         <span id="error-text">Identifiants incorrects.</span>
       </div>
 
       <button type="submit" class="btn btn-primary login-btn-full" id="login-btn">
-        <i class="fa-solid fa-right-to-bracket"></i>
         Se connecter
       </button>
     </form>
 
-    <div class="security-note">
-      <i class="fa-solid fa-shield-halved"></i>
-      Accès réservé aux administrateurs autorisés
-    </div>
   </div>
 
-  <!-- Firebase + Auth -->
   <script type="module">
     import { login } from './js/auth.js';
 
@@ -137,9 +78,7 @@
       e.preventDefault();
       errDiv.classList.remove('show');
       btn.disabled = true;
-      btn.innerHTML = `
-        <i class="fa-solid fa-spinner fa-spin"></i>
-        Connexion en cours…`;
+      btn.innerHTML = `Connexion en cours…`;
 
       const email    = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
@@ -158,9 +97,7 @@
         errText.textContent = msgs[err.code] || `Erreur : ${err.message}`;
         errDiv.classList.add('show');
         btn.disabled = false;
-        btn.innerHTML = `
-          <i class="fa-solid fa-right-to-bracket"></i>
-          Se connecter`;
+        btn.innerHTML = `Se connecter`;
       }
     });
   </script>
