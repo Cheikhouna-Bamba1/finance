@@ -830,9 +830,10 @@ tbody td { padding: .8rem 1rem; color: var(--gray-700); vertical-align: middle; 
 
 @media (max-width: 900px) {
   .navbar-menu    { display: none; }
+  .navbar-actions { margin-left: auto; }
   .navbar-actions .navbar-user,
   .navbar-actions .btn-logout { display: none; }
-  .navbar-actions .btn-logout-icon { width: 44px; height: 44px; font-size: 1.15rem; }
+  .navbar-actions .btn-logout-icon { display: flex; width: 44px; height: 44px; font-size: 1.15rem; }
   .hamburger      { display: flex; }
   .navbar { gap: .5rem; }
 }
