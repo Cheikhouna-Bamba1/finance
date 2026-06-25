@@ -106,6 +106,7 @@ if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('[type="submit"]');
+    btn.textContent = 'Enregistrement...';
     btn.disabled = true;
 
     const data = {
@@ -128,6 +129,7 @@ if (form) {
     } catch (err) {
       showToast('Erreur', err.message, 'error');
     } finally {
+      btn.textContent = 'Enregistrer';
       btn.disabled = false;
     }
   });

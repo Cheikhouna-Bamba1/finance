@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { showToast, fmtDate, confirmDialog, formatCurrency, escHtml } from './utils.js';
+import { showToast, fmtDate, confirmDialog, formatCurrency, escHtml, toInputDate } from './utils.js';
 import {
   collection, addDoc, updateDoc, deleteDoc,
   doc, onSnapshot, query, orderBy, Timestamp
@@ -185,8 +185,3 @@ if (form) {
   });
 }
 
-function toInputDate(ts) {
-  if (!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toISOString().split('T')[0];
-}

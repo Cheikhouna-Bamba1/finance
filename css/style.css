@@ -87,7 +87,6 @@ button, a, input, select, textarea { touch-action: manipulation; }
 
 .login-logo { text-align: center; margin-bottom: 2rem; }
 .login-logo h1 { font-size: 1.35rem; font-weight: 700; color: var(--green-dark); line-height: 1.3; }
-.login-logo p { font-size: .85rem; color: var(--gray-500); margin-top: .25rem; }
 .login-logo img {
   width: 80px; height: 80px;
   border-radius: 50%;
@@ -624,8 +623,6 @@ tbody td { padding: .8rem 1rem; color: var(--gray-700); vertical-align: middle; 
 
 .modal-close:hover { background: var(--gray-200); }
 .modal-body { padding: 1.25rem; }
-.modal-footer { padding: .85rem 1.25rem; border-top: 1px solid var(--gray-200); display: flex; gap: .75rem; justify-content: flex-end; }
-
 /* Filters */
 .filters-bar {
   display: flex;
@@ -653,7 +650,6 @@ tbody td { padding: .8rem 1rem; color: var(--gray-700); vertical-align: middle; 
 }
 
 .search-input input { padding-left: 2.35rem; }
-.filter-select { min-width: 160px; }
 
 /* Toasts */
 .toast-container {
@@ -893,13 +889,10 @@ tbody td { padding: .8rem 1rem; color: var(--gray-700); vertical-align: middle; 
   }
   .modal-header { position: relative; }
   .modal-body   { padding: 1rem; }
-  .modal-footer { padding: .75rem 1rem; flex-direction: column; gap: .5rem; padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
-  .modal-footer .btn { width: 100%; justify-content: center; padding: .7rem 1.2rem; font-size: .9rem; }
 
   .filters-bar { flex-direction: column; align-items: stretch; padding: .65rem .85rem; gap: .4rem; }
   .filters-bar .search-input { min-width: 0; }
   .filters-bar > div { width: 100%; }
-  .filter-select { min-width: 0; flex: 1; font-size: .78rem; padding: .6rem; }
   .filter-btn { flex: 0 0 auto; text-align: center; font-size: .76rem; padding: .45rem .7rem; }
   .filter-btn i { display: none; }
   .filters-bar div[style*="flex"] { overflow-x: auto; flex-wrap: nowrap; padding-bottom: .25rem; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
@@ -965,7 +958,6 @@ tbody td { padding: .8rem 1rem; color: var(--gray-700); vertical-align: middle; 
   .modal-header { padding: .85rem; position: relative; }
   .modal-header::before { width: 30px; height: 3px; }
   .modal-body { padding: .85rem; }
-  .modal-footer { padding: .6rem .85rem; }
   .modal-title { font-size: .95rem; }
 
   .table-wrapper { margin: 0 -.6rem; width: calc(100% + 1.2rem); }
@@ -993,6 +985,7 @@ tbody td { padding: .8rem 1rem; color: var(--gray-700); vertical-align: middle; 
 .text-muted   { color: var(--gray-400); }
 .fw-bold   { font-weight: 700; }
 .fw-medium { font-weight: 500; }
+.text-capitalize { text-transform: capitalize; }
 .mb-1 { margin-bottom: .5rem; }
 .mb-2 { margin-bottom: 1rem; }
 .mb-3 { margin-bottom: 1.5rem; }

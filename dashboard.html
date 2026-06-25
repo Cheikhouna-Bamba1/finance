@@ -201,7 +201,7 @@
 <script type="module">
   import './js/ui.js';
   import { db }     from './js/firebase-config.js';
-  import { formatCurrency, fmtDate } from './js/utils.js';
+  import { formatCurrency, fmtDate, escHtml } from './js/utils.js';
   import { createIncomeExpenseChart, createCategoryPieChart } from './js/charts.js';
   import {
     collection, onSnapshot, query, orderBy
@@ -307,7 +307,7 @@
           </div>
           <div class="transaction-info">
             <div class="transaction-name">${escHtml(item._label)}</div>
-            <div class="transaction-date">${fmtDate(date)} ${isInc ? '• Cotisation' : `• ${item.categorie || 'Dépense'}`}</div>
+            <div class="transaction-date">${fmtDate(date)} ${isInc ? '• Cotisation' : `• ${escHtml(item.categorie) || 'Dépense'}`}</div>
           </div>
           <div class="transaction-amount ${isInc ? 'income' : 'expense'}">
             ${isInc ? '+' : '−'}${formatCurrency(item.montant)}
@@ -339,9 +339,7 @@
     const el = document.getElementById(id);
     if (el) el.textContent = val;
   }
-  function escHtml(str) {
-    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+
 </script>
 </body>
 </html>
