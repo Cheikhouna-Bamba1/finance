@@ -7,20 +7,20 @@ Stack : **HTML5 · CSS3 · JavaScript Vanilla · Firebase Firestore · Firebase 
 
 ```
 dahira-finance/
-├── index.html              ← Connexion
-├── dashboard.html          ← Tableau de bord
-├── cotisations.html        ← Cotisations
-├── depenses.html           ← Dépenses
-├── evenements.html         ← Événements
-├── projets.html            ← Projets
-├── bilan.html              ← Bilan + export PDF
+├── index.html              - Connexion
+├── dashboard.html          - Tableau de bord
+├── cotisations.html        - Cotisations
+├── depenses.html           - Dépenses
+├── evenements.html         - Événements
+├── projets.html            - Projets
+├── bilan.html              - Bilan + export PDF
 ├── css/
 │   └── style.css
 ├── js/
-│   ├── firebase-config.js  ← Configuration Firebase
-│   ├── auth.js             ← Authentification
-│   ├── utils.js            ← Fonctions utilitaires
-│   ├── charts.js           ← Graphiques (Chart.js)
+│   ├── firebase-config.js  - Configuration Firebase
+│   ├── auth.js             - Authentification
+│   ├── utils.js            - Fonctions utilitaires
+│   ├── charts.js           - Graphiques (Chart.js)
 │   ├── cotisations.js
 │   ├── depenses.js
 │   ├── evenements.js
@@ -36,7 +36,7 @@ dahira-finance/
 1. Rendez-vous sur [console.firebase.google.com](https://console.firebase.google.com/)
 2. Ajoutez un projet (ex: `dahira-finance`)
 3. Activez **Firestore Database** en mode production
-4. Activez **Authentication** → méthode **E-mail/Mot de passe**
+4. Activez **Authentication** > methode **E-mail/Mot de passe**
 5. Créez 2 utilisateurs administrateurs
 
 ### Règles Firestore
@@ -54,7 +54,7 @@ service cloud.firestore {
 
 ### 2. Configurer l'application
 
-1. Dans Firebase Console : ⚙️ → **Ajouter une application** → **Web**
+1. Dans Firebase Console : allez dans **Ajouter une application** > **Web**
 2. Copiez le bloc `firebaseConfig`
 3. Collez-le dans `js/firebase-config.js`
 
@@ -69,16 +69,16 @@ git remote add origin https://github.com/VOTRE_USERNAME/dahira-finance.git
 git push -u origin main
 ```
 
-Sur GitHub : **Settings → Pages** → déployer depuis `main` `/ (root)`.
+Sur GitHub : **Settings > Pages** > déployer depuis `main` `/ (root)`.
 
 ## Compatibilité
 
 | Navigateur | Support |
 |-----------|---------|
-| Chrome 90+ | ✅ |
-| Firefox 88+ | ✅ |
-| Safari 14+ | ✅ |
-| Edge 90+ | ✅ |
+| Chrome 90+ | Oui |
+| Firefox 88+ | Oui |
+| Safari 14+ | Oui |
+| Edge 90+ | Oui |
 
 > Internet Explorer n'est pas supporté (modules ES6).
 
